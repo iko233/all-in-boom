@@ -3,6 +3,7 @@ package ski.iko.app.allinboom.provider;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -44,10 +45,29 @@ public class GptProvider extends AbstractProvider {
                 HttpPost httpPost = buildHttpPost(model, messages, true);
                 try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
                     InputStream inputStream = response.getEntity().getContent();
-                    byte[] bytes = new byte[1024];
-                    String readString = new String(bytes, StandardCharsets.UTF_8);
-                    while (inputStream.read(bytes) > 0) {
-                        sseEmitter.send(bytes);
+                    byte[] buffer = new byte[1048];
+                    int bytesRead;
+                    StringBuilder textBuilder = new StringBuilder();
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        String chunk = new String(buffer, 0, bytesRead, StandardCharsets.UTF_8);
+                        while(chunk.contains("\n")) {
+                            int i = chunk.indexOf("\n");
+                            String substring = chunk.substring(0,i);
+                            if (i+1!=chunk.length()){
+                                chunk = chunk.substring(i+1);
+                            }else{
+                                chunk = "";
+                            }
+                            textBuilder.append(substring);
+                            textBuilder.append("\n");
+                            if (!textBuilder.toString().isBlank()) {
+                                sseEmitter.send(textBuilder.toString());
+                            }
+                            textBuilder.setLength(0);
+                        }
+                    }
+                    if (textBuilder.length() > 0) {
+                        sseEmitter.send(textBuilder.toString());
                     }
                     sseEmitter.complete();
                 }
