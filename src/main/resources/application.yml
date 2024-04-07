@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: all-in-boom
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:/Users/iko/iko/all-in-boom/app.db
