@@ -11,6 +11,8 @@ import ski.iko.app.allinboom.provider.IProvider;
 
 @Service
 public class BedRcokProvider extends AbstractProvider implements IProvider {
+    public static final String PROVIDER_TYPE = BedRcokProvider.class.getName();
+
     @Override
     public SseEmitter stream(List<Message> messages, String model) {
         return null;

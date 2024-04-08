@@ -18,6 +18,9 @@ import com.alibaba.fastjson2.JSONObject;
 
 import ski.iko.app.allinboom.controller.Message;
 import ski.iko.app.allinboom.provider.HttpAbstractProvider;
+import ski.iko.app.allinboom.provider.impl.gemini.pojo.GeminiContent;
+import ski.iko.app.allinboom.provider.impl.gemini.pojo.GeminiPart;
+import ski.iko.app.allinboom.provider.impl.gemini.pojo.GeminiRequest;
 import ski.iko.app.allinboom.util.GptResponseBuilderUtil;
 
 @Service(GeminiProvider.PROVIDER_TYPE)

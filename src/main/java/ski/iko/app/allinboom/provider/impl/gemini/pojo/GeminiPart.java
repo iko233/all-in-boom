@@ -1,4 +1,4 @@
-package ski.iko.app.allinboom.provider.impl.gemini;
+package ski.iko.app.allinboom.provider.impl.gemini.pojo;
 
 import lombok.Data;
 
