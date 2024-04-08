@@ -15,6 +15,7 @@
     <description>all-in-boom</description>
     <properties>
         <java.version>21</java.version>
+        <bedrock.version>2.25.11</bedrock.version>
     </properties>
     <dependencies>
         <dependency>
@@ -54,6 +55,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>bedrockruntime</artifactId>
+            <version>${bedrock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>bedrock</artifactId>
+            <version>${bedrock.version}</version>
         </dependency>
     </dependencies>
 

@@ -1,4 +1,4 @@
-package ski.iko.app.allinboom.provider;
+package ski.iko.app.allinboom.provider.impl.gemini;
 
 import java.util.List;
 

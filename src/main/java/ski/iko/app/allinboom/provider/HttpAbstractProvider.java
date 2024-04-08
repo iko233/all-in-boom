@@ -58,4 +58,10 @@ public abstract class HttpAbstractProvider extends AbstractProvider {
         void complete();
     }
 
+    abstract public String defaultApiUrl();
+
+    public String requestUrl() {
+        return this.getProxyUrl() != null && !this.getProxyUrl()
+            .isBlank() ? this.getProxyUrl() : this.defaultApiUrl();
+    }
 }

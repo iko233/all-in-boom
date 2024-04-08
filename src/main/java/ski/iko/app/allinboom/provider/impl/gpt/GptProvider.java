@@ -1,4 +1,4 @@
-package ski.iko.app.allinboom.provider;
+package ski.iko.app.allinboom.provider.impl.gpt;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,6 +15,7 @@ import com.alibaba.fastjson2.JSON;
 
 import ski.iko.app.allinboom.controller.GptRequest;
 import ski.iko.app.allinboom.controller.Message;
+import ski.iko.app.allinboom.provider.HttpAbstractProvider;
 
 @Service(GptProvider.PROVIDER_TYPE)
 @Scope("prototype")

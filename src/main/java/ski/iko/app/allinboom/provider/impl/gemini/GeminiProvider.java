@@ -1,4 +1,4 @@
-package ski.iko.app.allinboom.provider;
+package ski.iko.app.allinboom.provider.impl.gemini;
 
 import java.io.IOException;
 import java.net.URI;
@@ -17,6 +17,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 
 import ski.iko.app.allinboom.controller.Message;
+import ski.iko.app.allinboom.provider.HttpAbstractProvider;
 import ski.iko.app.allinboom.util.GptResponseBuilderUtil;
 
 @Service(GeminiProvider.PROVIDER_TYPE)
@@ -63,7 +64,7 @@ public class GeminiProvider extends HttpAbstractProvider {
         httpPost.setHeader("Accept", "application/json");
         GeminiRequest geminiRequest = new GeminiRequest();
         geminiRequest.setContents(new ArrayList<>());
-        if (!messages.isEmpty() && !messages.get(0).getRole().equals("user")) {
+        if (!messages.isEmpty() && !messages.getFirst().getRole().equals("user")) {
             GeminiContent geminiContent = new GeminiContent();
             geminiContent.setRole("user");
             geminiContent.setParts(new GeminiPart());
