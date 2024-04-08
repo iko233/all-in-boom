@@ -1,19 +1,12 @@
 package ski.iko.app.allinboom.provider;
 
-import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -25,78 +18,35 @@ import ski.iko.app.allinboom.controller.Message;
 
 @Service(GptProvider.PROVIDER_TYPE)
 @Scope("prototype")
-public class GptProvider extends AbstractProvider {
+public class GptProvider extends HttpAbstractProvider {
     public static final String PROVIDER_TYPE = "GptProvider";
-    private static final String DEFAULT_API_URL = "https://api.openai.com/v1/chat/completions";
-    @Autowired
-    private HttpClientBuilder httpClientBuilder;
 
     @Override
     public String defaultApiUrl() {
-        return DEFAULT_API_URL;
+        return "https://api.openai.com/v1/chat/completions";
     }
 
     @Override
     public SseEmitter stream(List<Message> messages, String model) {
         SseEmitter sseEmitter = new SseEmitter();
-        new Thread(() -> {
-            try {
-                CloseableHttpClient httpclient = httpClientBuilder.build();
-                HttpPost httpPost = buildHttpPost(model, messages, true);
-                try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-                    InputStream inputStream = response.getEntity().getContent();
-                    byte[] buffer = new byte[1048];
-                    int bytesRead;
-                    StringBuilder textBuilder = new StringBuilder();
-                    while ((bytesRead = inputStream.read(buffer)) != -1) {
-                        String chunk = new String(buffer, 0, bytesRead, StandardCharsets.UTF_8);
-                        while(chunk.contains("\n")) {
-                            int i = chunk.indexOf("\n");
-                            String substring = chunk.substring(0,i);
-                            if (i+1!=chunk.length()){
-                                chunk = chunk.substring(i+1);
-                            }else{
-                                chunk = "";
-                            }
-                            textBuilder.append(substring);
-                            textBuilder.append("\n");
-                            if (!textBuilder.toString().isBlank()) {
-                                sseEmitter.send(textBuilder.toString());
-                            }
-                            textBuilder.setLength(0);
-                        }
-                    }
-                    if (textBuilder.length() > 0) {
-                        sseEmitter.send(textBuilder.toString());
-                    }
-                    sseEmitter.complete();
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("请求[" + getName() + "]异常", e);
-            }
-        }).start();
+        HttpPost httpPost = buildHttpPost(model, messages, true);
+        httpStreamRequest(httpPost, sseEmitter::send, sseEmitter::complete);
         return sseEmitter;
     }
 
     @Override
     public String normal(List<Message> messages, String model) {
-        try {
-            CloseableHttpClient httpclient = httpClientBuilder.build();
-            HttpPost httpPost = buildHttpPost(model, messages, false);
-            try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-                if (response.getCode() != 200) {
-                    throw new RuntimeException("请求[" + getName() + "]响应状态码异常,状态码为[" + response.getCode() + "]");
-                }
-                HttpEntity entity = response.getEntity();
-                return EntityUtils.toString(entity, "UTF-8").trim();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("请求[" + getName() + "]异常", e);
-        }
+        HttpPost httpPost = buildHttpPost(model, messages, false);
+        return httpRequest(httpPost);
     }
 
-    private HttpPost buildHttpPost(String model,List<Message> messages,boolean stream) throws Exception{
-        HttpPost httpPost = new HttpPost(new URI(requestUrl()));
+    private HttpPost buildHttpPost(String model,List<Message> messages,boolean stream) {
+        HttpPost httpPost;
+        try {
+            httpPost = new HttpPost(new URI(requestUrl()));
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("解析URL["+requestUrl()+"]错误",e);
+        }
         httpPost.addHeader("Content-Type", "application/json;charset=utf-8");
         httpPost.setHeader("Accept", "application/json");
         httpPost.addHeader("Authorization", "Bearer " + getKey());

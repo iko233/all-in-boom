@@ -22,7 +22,7 @@ public class GptController {
             providerString = request.getModel().substring(0, request.getModel().indexOf("/"));
             modelString = request.getModel().substring(request.getModel().indexOf("/") + 1);
         }catch (Exception e) {
-            throw new RuntimeException("无效的模型信息",e);
+            throw new RuntimeException("无效的模型信息["+request.getModel()+"]",e);
         }
         IProvider provider = this.providerManager.getProvider(providerString);
         if (Objects.isNull(provider)) {
