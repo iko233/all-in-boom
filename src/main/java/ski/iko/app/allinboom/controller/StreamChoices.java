@@ -6,4 +6,5 @@ import lombok.Data;
 public class StreamChoices {
     private Long index;
     private Delta delta;
+    private String finish_reason;
 }

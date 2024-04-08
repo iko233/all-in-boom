@@ -16,8 +16,14 @@ public class GptController {
 
     @RequestMapping({"/completions"})
     public Object completions(@RequestBody GptRequest request) {
-        String providerString = request.getModel().substring(0, request.getModel().indexOf("/"));
-        String modelString = request.getModel().substring(request.getModel().indexOf("/") + 1);
+        String providerString = null;
+        String modelString = null;
+        try {
+            providerString = request.getModel().substring(0, request.getModel().indexOf("/"));
+            modelString = request.getModel().substring(request.getModel().indexOf("/") + 1);
+        }catch (Exception e) {
+            throw new RuntimeException("无效的模型信息",e);
+        }
         IProvider provider = this.providerManager.getProvider(providerString);
         if (Objects.isNull(provider)) {
             throw new RuntimeException("未知的提供商["+providerString+"]");
